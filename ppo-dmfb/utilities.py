@@ -135,14 +135,6 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     p_env = DMFBenv(10, 10, 2)
-    # model = DecentrailizedTrainer(VggCnnPolicy, p_env, 'PPO', True)
-    # model.learn(1000)
-    # model = DecentrailizedTrainer(DqnVggCnnPolicy, p_env, 'DQN', True)
-    # model.learn(1000)
-    # model = DecentrailizedTrainer(VggCnnPolicy, p_env, 'ACER', False)
-    # model.learn(100)
-
-    # evaluation example
 
     # 1. Decentralized and concurrent learning
     trainer = DecentrailizedTrainer(VggCnnPolicy, p_env, 'PPO', True)
@@ -150,17 +142,3 @@ if __name__ == '__main__':
     print(trainer)
     print(trainer.models)
     print(trainer.p_env)
-    # actions = [0] * len(p_env.agents)
-    # observations = []
-    # rewards = [0.0] * len(p_env.agents)
-    # dones = [False] * len(p_env.agents)
-    # # while np.all(dones): # when all done
-    # for i, agent in enumerate(p_env.agents):
-    #     model = trainer.models[agent]
-    #     env = model.envs[0] # might be a vectorized Env
-    #     actions[i], state = model.predict(observations[i])
-    #     observations[i], rewards[i], dones[i], _ = env.step()
-    #     print('-----------------')
-    #     print('actions',actions)
-    #     print('rewards',rewards)
-    # print("Finished utilities.py")
