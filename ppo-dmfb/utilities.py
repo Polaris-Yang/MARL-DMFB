@@ -153,7 +153,7 @@ class ConcurrentAgentEnv(gym.Env):
                 continue
             if np.linalg.norm(past_pisition[self.agent_index] - cur_position[i]) < 2:
                 dynamic_conflict += 1
-        for i in range(len(env.agents)):
+        for i in range(len(self.env.agents)):
             if i==self.agent_index:
                 continue
             if np.linalg.norm(past_pisition[i] - cur_position[self.agent_index]) < 2:
