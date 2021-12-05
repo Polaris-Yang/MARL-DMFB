@@ -97,7 +97,7 @@ def get_parser():
     parser.add_argument(
         '--length', help='Length of the biochip', type=int, default=10)
     parser.add_argument(
-        '--n-agents', help='Number of agents', type=int, default=4)
+        '--n-agents', help='Number of agents', type=int, default=2)
     parser.add_argument('--b-degrade', action="store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type=float, default=0)
 
@@ -110,8 +110,6 @@ def main(args=None):
     print(args.b_degrade)
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
 
-    # the path to where log files will be saved
-    # example path: log/30_60/PPO_SimpleCnnPolicy
     path_log = os.path.join('log', args.method, str(args.width)+'_'+str(args.length),
                             str(args.n_agents), args.algo+'_VggCnnPolicy')
     # create the path if it does not exist
