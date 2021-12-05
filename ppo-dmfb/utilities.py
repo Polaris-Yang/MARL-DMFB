@@ -102,6 +102,10 @@ class ConcurrentAgentEnv(gym.Env):
         self.count += 1
         reward,_,_ = self.env.routing_manager.moveOneDroplet(
                 self.agent_index, action, self.env.m_health, True)
+        reward += self.comflic_static()
+        reward += self.comflic_dynamic()
+        if np.all(self.env.routing_manager.getTaskStatus()):
+            reward+=20
         obs = self.env.getOneObs(self.agent_index)
         if self.count <= self.env.max_step:
             done = self.env.routing_manager.getTaskStatus()[self.agent_index]
@@ -130,7 +134,31 @@ class ConcurrentAgentEnv(gym.Env):
         droplet = self.env.routing_manager.droplets[self.agent_index]
         self.env.m_usage[droplet.y][droplet.x] += 1
 
+    def comflic_static(self):
+        static_conflic = 0
+        cur_positions = self.env.routing_manager.curs
+        for i in range(len(env.agents)):
+            if i==self.agent_index:
+                continue
+            if np.linalg.norm(cur_positions[i]-cur_positions[self.agent_index]) < 2:
+                static_conflic += 1
+        return static_conflic
 
+    def comflic_dynamic(self):
+        dynamic_conflict = 0
+        cur_position = self.env.routing_manager.curs
+        past_pisition = self.env.routing_manager.pasts
+        for i in range(len(env.agents)):
+            if i==self.agent_index:
+                continue
+            if np.linalg.norm(past_pisition[self.agent_index] - cur_position[i]) < 2:
+                dynamic_conflict += 1
+        for i in range(len(env.agents)):
+            if i==self.agent_index:
+                continue
+            if np.linalg.norm(past_pisition[i] - cur_position[self.agent_index]) < 2:
+                dynamic_conflict += 1
+        return dynamic_conflict
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'

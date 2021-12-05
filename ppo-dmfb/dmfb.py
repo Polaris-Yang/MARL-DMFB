@@ -133,6 +133,8 @@ class RoutingTaskManager:
         self.droplets = []
         self.starts = np.zeros((self.n_droplets, 2), dtype=int)
         self.ends = np.zeros((self.n_droplets, 2), dtype=int)
+        self.pasts = np.zeros((self.n_droplets,2),dtype=int)*(-5)
+        self.curs = np.zeros((self.n_droplets,2),dtype=int)*(-5)
         self.distances = np.zeros((self.n_droplets,), dtype=int)
         self.blocks = []
         self.droplet_limit = int((self.width+1)*(self.length+1)/9)
@@ -144,6 +146,8 @@ class RoutingTaskManager:
 
     def Generate_task(self):
         self.GenDroplets()
+        self.curs = copy.deepcopy(self.starts)
+        self.pasts = np.zeros((self.n_droplets,2),dtype=int)*(-5)
         self.distances = np.sum(np.abs(self.starts - self.ends), axis=1)
         self.GenRandomBlocks()
 
@@ -159,7 +163,9 @@ class RoutingTaskManager:
             self.droplets.append(
                 Droplet(self.starts[i][0], self.starts[i][1], self.ends[i][0], self.ends[i][1]))
         self.distances = np.sum(np.abs(self.starts - self.ends), axis=1)
-
+        self.pasts = np.zeros((self.n_droplets,2),dtype=int)*(-5)
+        self.curs = copy.deepcopy(self.starts)
+        
     def resetTask(self,agent_index):
         x = np.random.randint(0, self.length, size=(2, 1))
         y = np.random.randint(0,self.width,size = (2,1))
@@ -173,6 +179,8 @@ class RoutingTaskManager:
         start, end = points[0],points[1]
         self.droplets[agent_index] = Droplet(start[0],start[1], end[0],end[1])
         self.starts[agent_index] = start
+        self.curs[agent_index] = start
+        self.pasts[agent_index] = [-5,-5]
         self.ends[agent_index] = end
         self.distances[agent_index] = dis 
     
@@ -346,10 +354,11 @@ class RoutingTaskManager:
             else:
                 reward = -0.4  # penalty for taking one more step
             self.distances[droplet_index] = new_dist
+        self.pasts[droplet_index] = np.array([x, y])
         past = np.array([x, y])
         cur = np.array([self.droplets[droplet_index].x,
                        self.droplets[droplet_index].y])
-
+        self.curs[droplet_index] = copy.deepcopy(cur)
         return reward, past, cur
 
     def _waitOtherActions(self, index):
