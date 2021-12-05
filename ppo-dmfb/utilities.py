@@ -137,7 +137,7 @@ class ConcurrentAgentEnv(gym.Env):
     def comflic_static(self):
         static_conflic = 0
         cur_positions = self.env.routing_manager.curs
-        for i in range(len(env.agents)):
+        for i in range(len(self.env.agents)):
             if i==self.agent_index:
                 continue
             if np.linalg.norm(cur_positions[i]-cur_positions[self.agent_index]) < 2:
@@ -148,7 +148,7 @@ class ConcurrentAgentEnv(gym.Env):
         dynamic_conflict = 0
         cur_position = self.env.routing_manager.curs
         past_pisition = self.env.routing_manager.pasts
-        for i in range(len(env.agents)):
+        for i in range(len(self.env.agents)):
             if i==self.agent_index:
                 continue
             if np.linalg.norm(past_pisition[self.agent_index] - cur_position[i]) < 2:
