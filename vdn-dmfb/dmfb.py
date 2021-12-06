@@ -463,7 +463,7 @@ class DMFBenv(ParallelEnv):
     # 环境初始化
 
     def __init__(self, width, length, n_agents, n_blocks, fov=5, stall=True, b_degrade=False, per_degrade=0.1):
-        super(Dropletenv, self).__init__()
+        super(DMFBenv, self).__init__()
         assert width >= 5 and length >= 5
         assert n_agents > 0
         self.actions = Action

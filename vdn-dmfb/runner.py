@@ -1,12 +1,13 @@
+import matplotlib.pyplot as plt
+from common.replay_buffer import ReplayBuffer
+from agent.agent import Agents
+from common.rollout import RolloutWorker
 import numpy as np
 import os
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
-from common.rollout import RolloutWorker
-from agent.agent import Agents
-from common.replay_buffer import ReplayBuffer
-import matplotlib.pyplot as plt
 plt.switch_backend('agg')
+
 
 class Runner:
     def __init__(self, env, args):
@@ -20,7 +21,8 @@ class Runner:
         self.episode_constraints = []
         self.success_rate = []
         # 用来保存plt和pkl
-        self.save_path = self.args.result_dir + '/' + args.alg +'/' + '{}by{}-{}d{}b'.format(self.args.chip_size,self.args.chip_size,self.args.drop_num,self.args.block_num)
+        self.save_path = self.args.result_dir + '/' + args.alg + '/' + '{}by{}-{}d{}b'.format(
+            self.args.chip_size, self.args.chip_size, self.args.drop_num, self.args.block_num)
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
 
@@ -44,7 +46,8 @@ class Runner:
             # 收集self.args.n_episodes个episodes
             # n_eisode 'the number of episodes before once training'
             for episode_idx in range(self.args.n_episodes):
-                episode, _, steps, _, _ = self.rolloutWorker.generate_episode(episode_idx)
+                episode, _, steps, _, _ = self.rolloutWorker.generate_episode(
+                    episode_idx)
                 episodes.append(episode)
                 time_steps += steps
             # episode的每一项都是一个(1, episode_len, n_agents, 具体维度)四维数组，下面要把所有episode的的obs拼在一起
@@ -52,10 +55,12 @@ class Runner:
             episodes.pop(0)
             for episode in episodes:
                 for key in episode_batch.keys():
-                    episode_batch[key] = np.concatenate((episode_batch[key], episode[key]), axis=0)
+                    episode_batch[key] = np.concatenate(
+                        (episode_batch[key], episode[key]), axis=0)
             self.buffer.store_episode(episode_batch)
             for train_step in range(self.args.train_steps):
-                mini_batch = self.buffer.sample(min(self.buffer.current_size, self.args.batch_size))
+                mini_batch = self.buffer.sample(
+                    min(self.buffer.current_size, self.args.batch_size))
                 self.agents.train(mini_batch, train_steps)
                 train_steps += 1
         average_episode_reward, average_episode_steps, average_episode_constraints, success_rate = self.evaluate()
@@ -96,20 +101,25 @@ class Runner:
         pylab.rcParams.update(params)
         y_name = ['Rewards', '$T_{latest}$', 'Constrains', 'success\_rate']
         x_name = 'step*' + str(self.args.evaluate_cycle)
-        data = [self.episode_rewards, self.episode_steps, self.episode_constraints, self.success_rate]
+        data = [self.episode_rewards, self.episode_steps,
+                self.episode_constraints, self.success_rate]
         for i in range(4):
             plt.subplot(4, 1, i + 1)
             plt.plot(data[i], linewidth=2)
             plt.xlabel(x_name)
             plt.ylabel(y_name[i])
         plt.tight_layout()
-        plt.savefig(self.save_path + '/plt_{}.png'.format(num), format='png', dpi=400)
+        plt.savefig(self.save_path + '/plt_{}.png'.format(num),
+                    format='png', dpi=400)
 
     def train_data_save(self, num):
         prefix = '/{}'.format(self.args.alg) + '_env({},{},{},{},{},{})'.format(
             self.args.chip_size, self.args.chip_size, self.args.drop_num, self.args.block_num, self.args.fov, self.args.stall)
-        np.save(self.save_path + prefix + 'Rewards_{}'.format(num), self.episode_rewards)
-        np.save(self.save_path + prefix + 'steps_{}'.format(num), self.episode_steps)
-        np.save(self.save_path + prefix + 'constraints_{}'.format(num), self.episode_constraints)
-        np.save(self.save_path + prefix + 'success_rate_{}'.format(num), self.success_rate)
-
+        np.save(self.save_path + prefix +
+                'Rewards_{}'.format(num), self.episode_rewards)
+        np.save(self.save_path + prefix +
+                'steps_{}'.format(num), self.episode_steps)
+        np.save(self.save_path + prefix +
+                'constraints_{}'.format(num), self.episode_constraints)
+        np.save(self.save_path + prefix +
+                'success_rate_{}'.format(num), self.success_rate)

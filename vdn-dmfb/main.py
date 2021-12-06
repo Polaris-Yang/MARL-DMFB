@@ -6,7 +6,8 @@ if __name__ == '__main__':
     for i in range(4):
         args = get_common_args()
         args = get_mixer_args(args)
-        env = DMFBenv(args.chip_size, args.chip_size, args.drop_num, args.block_num, fov=args.fov, stall=args.stall)
+        env = DMFBenv(args.chip_size, args.chip_size, args.drop_num,
+                      args.block_num, fov=args.fov, stall=args.stall)
         env_info = env.get_env_info()
         args.n_actions = env_info["n_actions"]
         args.n_agents = env_info["n_agents"]
@@ -18,9 +19,10 @@ if __name__ == '__main__':
             runner.run(i)
         else:
             average_episode_rewards, average_episode_steps, average_episode_constraints, success_rate = runner.evaluate()
-            print('The averege total_rewards of {} is  {}'.format(args.alg, average_episode_rewards))
-            print('The each epoch total_steps is: {}'.format(average_episode_steps))
-            print('The each epoch constraints is: {}'.format(average_episode_constraints))
+            print('The averege total_rewards of {} is  {}'.format(
+                args.alg, average_episode_rewards))
+            print('The each epoch total_steps is: {}'.format(
+                average_episode_steps))
             print('The successful rate is: {}'.format(success_rate))
             break
         env.close()

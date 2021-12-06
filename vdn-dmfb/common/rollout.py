@@ -59,8 +59,10 @@ class RolloutWorker:
             _, reward, terminated, info = self.env.step(actions)
             constraints += info['constraints']
             success += info['success']
-            reward = np.sum([reward[agent] for agent in self.env.agents]) / len(reward)
-            terminated = np.all([terminated[agent] for agent in self.env.agents])
+            reward = np.sum([reward[agent]
+                            for agent in self.env.agents]) / len(reward)
+            terminated = np.all([terminated[agent]
+                                for agent in self.env.agents])
             if self.args.show:
                 self.env.render()
                 time.sleep(0.05)

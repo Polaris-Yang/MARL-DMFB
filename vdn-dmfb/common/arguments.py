@@ -40,7 +40,7 @@ def get_common_args():
                         help='whether to load the pretrained model')
     parser.add_argument('--evaluate', default=False, action='store_true',
                         help='whether to evaluate the model')
-    parser.add_argument('--show', default=False,action='store_true',
+    parser.add_argument('--show', default=False, action='store_true',
                         help='show the droplet env')
     parser.add_argument('--stall', default=True, action='store_false',
                         help='whether the droplet can move or not after reach the target')
