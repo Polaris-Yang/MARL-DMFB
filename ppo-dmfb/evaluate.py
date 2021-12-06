@@ -13,9 +13,9 @@ from stable_baselines.common import make_vec_env
 from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines import PPO2, ACER, DQN
-from meda import*
+from dmfb import*
 from my_net import VggCnnPolicy, DqnVggCnnPolicy
-from utilities import DecentrailizedTrainer, CentralizedEnv, ParaSharingEnv, ConcurrentAgentEnv
+from utilities import DecentrailizedTrainer, ConcurrentAgentEnv
 import csv
 
 ALGOS = {'PPO': PPO2, 'ACER': ACER, 'DQN': DQN}
@@ -48,11 +48,11 @@ def EvaluateAgent(args, env, obs, agent, centralized = True):
 
 def evaluateOnce(args, path_log, env, repeat_num):
     algo = ALGOS[args.algo]
-    len_results = (args.stop_iters - args.start_iters)//2 + 1
+    len_results = (args.stop_iters - args.start_iters)//10 + 1
     results = {'multistep': [0]*len_results, 'multi': [0]*len_results,'success':[0]*len_results}
     for i in range(len_results):
         print('### Evaluating iteration %d' %(i*2))
-        model_name = '_'.join(['repeat', str(repeat_num), 'training', str(i*2), str(args.n_timesteps)])
+        model_name = '_'.join(['repeat', str(repeat_num), 'training', str(i*10), str(args.n_timesteps)])
         path_multi = os.path.join(path_log, model_name)
         if args.method == 'centralized':
             multi_agent = algo.load(path_multi)
@@ -92,7 +92,7 @@ def evaluateSeveralTimes(args=None, path_log=None):
     for repeat in range(1, args.n_repeat+1):
         print("### In repeat %d" %(repeat))
         start_time = time.time()
-        env = MEDAEnv(w=args.width, l=args.length, n_agents=args.n_agents,
+        env = DMFBenv(width=args.width, length=args.length, n_agents=args.n_agents,n_blocks=0,
                       b_degrade=args.b_degrade, per_degrade = args.per_degrade)
         results = evaluateOnce(args, path_log, env, repeat_num=repeat)
         print("### Repeat %s costs %s seconds ###" %(str(repeat), time.time() - start_time))

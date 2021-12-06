@@ -83,7 +83,7 @@ def get_parser():
     parser.add_argument('--method', help='The method use for rl training (centralized, sharing, concurrent)',
                         type=str, default='concurrent', choices=['centralized', 'sharing', 'concurrent'])
     parser.add_argument(
-        '--n-repeat', help='Number of repeats for the experiment', type=int, default=4)
+        '--n-repeat', help='Number of repeats for the experiment', type=int, default=1)
     parser.add_argument('--start-iters', help='Number of iterations the initialized model has been trained',
                         type=int, default=0)
     parser.add_argument('--stop-iters', help='Total number of iterations (including pre-train) for one repeat of the experiment',

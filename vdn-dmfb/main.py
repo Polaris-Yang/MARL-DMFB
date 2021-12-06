@@ -1,12 +1,12 @@
 from runner import Runner
 from common.arguments import get_common_args, get_mixer_args
-from droplet_gym.envs import *
+from dmfb import*
 
 if __name__ == '__main__':
     for i in range(4):
         args = get_common_args()
         args = get_mixer_args(args)
-        env = Dropletenv(args.chip_size, args.chip_size, args.drop_num, args.block_num, fov=args.fov, stall=args.stall)
+        env = DMFBenv(args.chip_size, args.chip_size, args.drop_num, args.block_num, fov=args.fov, stall=args.stall)
         env_info = env.get_env_info()
         args.n_actions = env_info["n_actions"]
         args.n_agents = env_info["n_agents"]

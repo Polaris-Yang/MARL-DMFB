@@ -449,7 +449,7 @@ class RoutingTaskManager:
         self.m_usage[index] = 0
 
 
-class Dropletenv(ParallelEnv):
+class DMFBenv(ParallelEnv):
     """ A DMFB biochip environment
     [0,0]
         +---l---+-> x

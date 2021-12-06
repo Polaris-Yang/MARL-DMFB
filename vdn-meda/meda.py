@@ -6,7 +6,6 @@ import numpy as np
 from PIL import Image
 from enum import IntEnum
 from datetime import datetime
-
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding

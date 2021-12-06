@@ -96,14 +96,14 @@ class ConcurrentAgentEnv(gym.Env):
         self.agent_index = self.env.agents.index(agent)
         self.action_space = self.env.action_spaces[agent]
         self.observation_space = self.env.observation_spaces[agent]
-        self.reward_range = (-20.0, 20.0)
+        self.reward_range = (-30.0, 30.0)
 
     def step(self, action):
         self.count += 1
         reward,_,_ = self.env.routing_manager.moveOneDroplet(
                 self.agent_index, action, self.env.m_health, True)
-        reward += self.comflic_static()
-        reward += self.comflic_dynamic()
+        reward -= 2*self.comflic_static()
+        reward -= 2*self.comflic_dynamic()
         if np.all(self.env.routing_manager.getTaskStatus()):
             reward+=20
         obs = self.env.getOneObs(self.agent_index)
