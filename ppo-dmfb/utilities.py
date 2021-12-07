@@ -20,9 +20,9 @@ class LearnThread(threading.Thread):
         self.agent = agent
 
     def run(self):
-        print("### Running thread", self.agent, "...")
+        # print("### Running thread", self.agent, "...")
         self.model.learn(self.total_timesteps)
-        print("### Finished thread", self.agent)
+        # print("### Finished thread", self.agent)
 
 class DecentrailizedTrainer:
     """

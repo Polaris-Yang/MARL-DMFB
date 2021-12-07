@@ -48,11 +48,11 @@ def EvaluateAgent(args, env, obs, agent, centralized = True):
 
 def evaluateOnce(args, path_log, env, repeat_num):
     algo = ALGOS[args.algo]
-    len_results = (args.stop_iters - args.start_iters)//10 + 1
+    len_results = (args.stop_iters - args.start_iters)//2 + 1
     results = {'multistep': [0]*len_results, 'multi': [0]*len_results,'success':[0]*len_results}
     for i in range(len_results):
         print('### Evaluating iteration %d' %(i*2))
-        model_name = '_'.join(['repeat', str(repeat_num), 'training', str(i*10), str(args.n_timesteps)])
+        model_name = '_'.join(['repeat', str(repeat_num), 'training', str(i*2), str(args.n_timesteps)])
         path_multi = os.path.join(path_log, model_name)
         if args.method == 'centralized':
             multi_agent = algo.load(path_multi)
@@ -117,13 +117,13 @@ def get_parser():
     parser.add_argument('--start-iters', help='Number of iterations the initialized model has been trained',
                         type=int, default=0)
     parser.add_argument('--stop-iters', help='Total number of iterations (including pre-train) for one repeat of the experiment',
-                        type=int, default=150)
+                        type=int, default=200)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
     # env settings
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 10)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 10)
-    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
+    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 3)
     parser.add_argument('--b-degrade', action = "store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
     # rl evaluate
