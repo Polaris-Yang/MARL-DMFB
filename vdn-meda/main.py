@@ -6,13 +6,15 @@ if __name__ == '__main__':
     for i in range(4):
         args = get_common_args()
         args = get_mixer_args(args)
+        print(args)
         env = MEDAEnv(w = args.width,l = args.length,n_agents= args.drop_num,
                       b_degrade= args.b_degrade,per_degrade= args.per_degrade)
         env_info = env.get_env_info()
         args.n_actions = env_info["n_actions"]
         args.n_agents = env_info["n_agents"]
-        args.state_shape = env_info["state_shape"]
+        # args.state_shape = env_info["state_shape"]
         args.obs_shape = env_info["obs_shape"]
+        # print(args.obs_shape)
         args.episode_limit = env_info["episode_limit"]
         runner = Runner(env, args)
         if not args.evaluate:

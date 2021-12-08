@@ -30,7 +30,7 @@ def get_common_args():
                         default="ADAM", help='optimizer')
     parser.add_argument('--evaluate_cycle', type=int,
                         default=20000, help='how often to evaluate the model')
-    parser.add_argument('--evaluate_epoch', type=int, default=200,
+    parser.add_argument('--evaluate_epoch', type=int, default=100,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--model_dir', type=str,
                         default='./model', help='model directory of the policy')
@@ -42,7 +42,7 @@ def get_common_args():
                         help='whether to evaluate the model')
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 30)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 60)
-    parser.add_argument('--drop_num', type=int, default=3,help='the number of droplet')
+    parser.add_argument('--drop_num', type=int, default=2,help='the number of droplet')
     parser.add_argument('--b-degrade', action = "store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
     args = parser.parse_args()
@@ -56,7 +56,7 @@ def get_mixer_args(args):
     args.qmix_hidden_dim = 32
     args.two_hyper_layers = True
     args.hyper_hidden_dim = 32
-    args.lr = 5e-4
+    args.lr = 1e-3
 
     # epsilon greedy
     args.epsilon = 1
@@ -70,7 +70,7 @@ def get_mixer_args(args):
 
     # experience replay
     args.batch_size = 128
-    args.buffer_size = int(10000)
+    args.buffer_size = int(5000)
 
     # how often to save the model
     args.save_cycle = 5000

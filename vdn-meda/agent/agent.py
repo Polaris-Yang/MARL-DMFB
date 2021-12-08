@@ -8,7 +8,7 @@ class Agents:
     def __init__(self, args):
         self.n_actions = args.n_actions
         self.n_agents = args.n_agents
-        self.state_shape = args.state_shape
+        # self.state_shape = args.state_shape
         self.obs_shape = args.obs_shape
         if args.alg == 'vdn':
             from policy.vdn import VDN
