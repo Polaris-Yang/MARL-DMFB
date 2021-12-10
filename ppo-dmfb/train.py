@@ -46,7 +46,7 @@ def runAnExperiment(args, path_log, env, repeat_num):
         if i%10==0:
             print("### Start training the iteration %d" % (i))
         model.learn(total_timesteps=args.n_timesteps)
-        if path_log and i % 2 == 0:
+        if path_log and i % 5 == 0:
             model_name = '_'.join(
                 ['repeat', str(repeat_num), 'training', str(i), str(args.n_timesteps)])
             model.save(os.path.join(path_log, model_name))
@@ -76,7 +76,6 @@ def get_parser():
     # device
     parser.add_argument('--cuda', help='CUDA Visible devices',
                         default='0', type=str, required=False)
-
     # rl algorithm
     parser.add_argument('--algo', help='RL Algorithm', default='PPO',
                         type=str, required=False, choices=list(ALGOS.keys()))
@@ -84,11 +83,11 @@ def get_parser():
     parser.add_argument('--method', help='The method use for rl training (centralized, sharing, concurrent)',
                         type=str, default='concurrent', choices=['centralized', 'sharing', 'concurrent'])
     parser.add_argument(
-        '--n-repeat', help='Number of repeats for the experiment', type=int, default=4)
+        '--n-repeat', help='Number of repeats for the experiment', type=int, default=5)
     parser.add_argument('--start-iters', help='Number of iterations the initialized model has been trained',
                         type=int, default=0)
     parser.add_argument('--stop-iters', help='Total number of iterations (including pre-train) for one repeat of the experiment',
-                        type=int, default=200)
+                        type=int, default=400)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
 

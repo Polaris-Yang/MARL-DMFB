@@ -18,14 +18,13 @@ class ReplayBuffer:
                         'u': np.empty([self.size, self.episode_limit, self.n_agents, 1]),
                         'r': np.empty([self.size, self.episode_limit, 1]),
                         'o_next': np.empty([self.size, self.episode_limit, self.n_agents, self.obs_shape]),
+                        # 's_next': np.empty([self.size, self.episode_limit, self.state_shape]),
                         'avail_u': np.empty([self.size, self.episode_limit, self.n_agents, self.n_actions]),
                         'avail_u_next': np.empty([self.size, self.episode_limit, self.n_agents, self.n_actions]),
                         'u_onehot': np.empty([self.size, self.episode_limit, self.n_agents, self.n_actions]),
                         'padded': np.empty([self.size, self.episode_limit, 1]),
                         'terminated': np.empty([self.size, self.episode_limit, 1])
                         }
-        if self.args.alg == 'maven':
-            self.buffers['z'] = np.empty([self.size, self.args.noise_dim])
         # thread lock
         self.lock = threading.Lock()
 
@@ -38,15 +37,15 @@ class ReplayBuffer:
             # store the informations
             self.buffers['o'][idxs] = episode_batch['o']
             self.buffers['u'][idxs] = episode_batch['u']
+            # self.buffers['s'][idxs] = episode_batch['s']
             self.buffers['r'][idxs] = episode_batch['r']
             self.buffers['o_next'][idxs] = episode_batch['o_next']
+            # self.buffers['s_next'][idxs] = episode_batch['s_next']
             self.buffers['avail_u'][idxs] = episode_batch['avail_u']
             self.buffers['avail_u_next'][idxs] = episode_batch['avail_u_next']
             self.buffers['u_onehot'][idxs] = episode_batch['u_onehot']
             self.buffers['padded'][idxs] = episode_batch['padded']
             self.buffers['terminated'][idxs] = episode_batch['terminated']
-            if self.args.alg == 'maven':
-                self.buffers['z'][idxs] = episode_batch['z']
 
     def sample(self, batch_size):
         temp_buffer = {}

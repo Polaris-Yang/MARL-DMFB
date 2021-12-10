@@ -17,13 +17,9 @@ class VDN:
         if args.reuse_network:
             input_shape += self.n_agents
 
-        # 神经网络
-        if args.net == 'rnn':
-            self.eval_rnn = RNN(input_shape, args)  # 每个agent选动作的网络
-            self.target_rnn = RNN(input_shape, args)
-        elif args.net == 'crnn':
-            self.eval_rnn = CRNN(args)  # 每个agent选动作的网络
-            self.target_rnn = CRNN(args)
+
+        self.eval_rnn = CRNN(args)  # 每个agent选动作的网络
+        self.target_rnn = CRNN(args)
         self.eval_vdn_net = VDNNet()  # 把agentsQ值加起来的网络
         self.target_vdn_net = VDNNet()
         self.args = args
@@ -33,20 +29,16 @@ class VDN:
             self.eval_vdn_net.cuda()
             self.target_vdn_net.cuda()
 
-        self.model_dir = args.model_dir + '/' + args.alg + '/' + '{}by{}-{}d{}b'.format(
-            self.args.chip_size, self.args.chip_size, self.args.drop_num, self.args.block_num)
+        self.model_dir = args.model_dir + '/' + args.alg + '/' + '{}by{}-{}d'.format(self.args.width,self.args.length,self.args.drop_num)
         # 如果存在模型则加载模型
         if self.args.load_model:
             if os.path.exists(self.model_dir + '/rnn_net_params.pkl'):
                 path_rnn = self.model_dir + '/rnn_net_params.pkl'
                 path_vdn = self.model_dir + '/vdn_net_params.pkl'
                 map_location = 'cuda:0' if self.args.cuda else 'cpu'
-                self.eval_rnn.load_state_dict(torch.load(
-                    path_rnn, map_location=map_location))
-                self.eval_vdn_net.load_state_dict(
-                    torch.load(path_vdn, map_location=map_location))
-                print('Successfully load the model: {} and {}'.format(
-                    path_rnn, path_vdn))
+                self.eval_rnn.load_state_dict(torch.load(path_rnn, map_location=map_location))
+                self.eval_vdn_net.load_state_dict(torch.load(path_vdn, map_location=map_location))
+                print('Successfully load the model: {} and {}'.format(path_rnn, path_vdn))
             else:
                 raise Exception("No model!")
 
@@ -54,16 +46,13 @@ class VDN:
         self.target_rnn.load_state_dict(self.eval_rnn.state_dict())
         self.target_vdn_net.load_state_dict(self.eval_vdn_net.state_dict())
 
-        self.eval_parameters = list(
-            self.eval_vdn_net.parameters()) + list(self.eval_rnn.parameters())
+        self.eval_parameters = list(self.eval_vdn_net.parameters()) + list(self.eval_rnn.parameters())
         if args.optimizer == "RMS":
-            self.optimizer = torch.optim.RMSprop(
-                self.eval_parameters, lr=args.lr)
+            self.optimizer = torch.optim.RMSprop(self.eval_parameters, lr=args.lr)
         elif args.optimizer == "SGD":
             self.optimizer = torch.optim.SGD(self.eval_parameters, lr=args.lr)
         elif args.optimizer == 'ADAM':
-            self.optimizer = torch.optim.Adam(
-                self.eval_parameters, lr=args.lr, betas=(0.9, 0.99))
+            self.optimizer = torch.optim.Adam(self.eval_parameters, lr=args.lr, betas=(0.9, 0.99))
         elif args.optimizer == 'ASGD':
             self.optimizer = torch.optim.Adam(self.eval_parameters, lr=args.lr)
 
@@ -73,8 +62,7 @@ class VDN:
         self.target_hidden = None
         print('Init alg VDN')
 
-    # train_step表示是第几次学习，用来控制更新target_net网络的参数
-    def learn(self, batch, max_episode_len, train_step, epsilon=None):
+    def learn(self, batch, max_episode_len, train_step, epsilon=None):  # train_step表示是第几次学习，用来控制更新target_net网络的参数
         '''
         在learn的时候，抽取到的数据是四维的，四个维度分别为 1——第几个episode 2——episode中第几个transition
         3——第几个agent的数据 4——具体obs维度。因为在选动作时不仅需要输入当前的inputs，还要给神经网络输入hidden_state，
@@ -90,7 +78,7 @@ class VDN:
                 batch[key] = torch.tensor(batch[key], dtype=torch.float32)
         # TODO pymarl中取得经验没有取最后一条，找出原因
         u, r, avail_u, avail_u_next, terminated = batch['u'], batch['r'], batch['avail_u'], \
-            batch['avail_u_next'], batch['terminated']
+                                                  batch['avail_u_next'], batch['terminated']
         mask = 1 - batch["padded"].float()  # 用来把那些填充的经验的TD-error置0，从而不让它们影响到学习
         if self.args.cuda:
             u = u.cuda()
@@ -121,8 +109,7 @@ class VDN:
         # print('Loss is ', loss)
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(
-            self.eval_parameters, self.args.grad_norm_clip)
+        torch.nn.utils.clip_grad_norm_(self.eval_parameters, self.args.grad_norm_clip)
         self.optimizer.step()
 
         if train_step > 0 and train_step % self.args.target_update_cycle == 0:
@@ -132,7 +119,7 @@ class VDN:
     def _get_inputs(self, batch, transition_idx):
         # 取出所有episode上该transition_idx的经验，u_onehot要取出所有，因为要用到上一条
         obs, obs_next, u_onehot = batch['o'][:, transition_idx], \
-            batch['o_next'][:, transition_idx], batch['u_onehot'][:]
+                                  batch['o_next'][:, transition_idx], batch['u_onehot'][:]
         episode_num = obs.shape[0]
         inputs, inputs_next = [], []
         inputs.append(obs)
@@ -148,17 +135,13 @@ class VDN:
             # 因为当前的obs三维的数据，每一维分别代表(episode，agent，obs维度)，直接在dim_1上添加对应的向量
             # 即可，比如给agent_0后面加(1, 0, 0, 0, 0)，表示5个agent中的0号。而agent_0的数据正好在第0行，那么需要加的
             # agent编号恰好就是一个单位矩阵，即对角线为1，其余为0
-            inputs.append(torch.eye(self.args.n_agents).unsqueeze(
-                0).expand(episode_num, -1, -1))
-            inputs_next.append(torch.eye(self.args.n_agents).unsqueeze(
-                0).expand(episode_num, -1, -1))
+            inputs.append(torch.eye(self.args.n_agents).unsqueeze(0).expand(episode_num, -1, -1))
+            inputs_next.append(torch.eye(self.args.n_agents).unsqueeze(0).expand(episode_num, -1, -1))
 
         # 要把obs中的三个拼起来，并且要把episode_num个episode、self.args.n_agents个agent的数据拼成episode_num*n_agents条数据
         # 因为这里所有agent共享一个神经网络，每条数据中带上了自己的编号，所以还是自己的数据
-        inputs = torch.cat(
-            [x.reshape(episode_num * self.args.n_agents, -1) for x in inputs], dim=1)
-        inputs_next = torch.cat(
-            [x.reshape(episode_num * self.args.n_agents, -1) for x in inputs_next], dim=1)
+        inputs = torch.cat([x.reshape(episode_num * self.args.n_agents, -1) for x in inputs], dim=1)
+        inputs_next = torch.cat([x.reshape(episode_num * self.args.n_agents, -1) for x in inputs_next], dim=1)
         # inputs shape: (N*e,obs+N+Acion_N)
         return inputs, inputs_next
 
@@ -166,8 +149,7 @@ class VDN:
         episode_num = batch['o'].shape[0]
         q_evals, q_targets = [], []
         for transition_idx in range(max_episode_len):
-            inputs, inputs_next = self._get_inputs(
-                batch, transition_idx)  # 给obs加last_action、agent_id
+            inputs, inputs_next = self._get_inputs(batch, transition_idx)  # 给obs加last_action、agent_id
             if self.args.cuda:
                 inputs = inputs.cuda()
                 inputs_next = inputs_next.cuda()
@@ -175,8 +157,7 @@ class VDN:
                 self.target_hidden = self.target_hidden.cuda()
             q_eval, self.eval_hidden = self.eval_rnn(inputs,
                                                      self.eval_hidden)  # 得到的q_eval维度为(episode_num*n_agents, n_actions)
-            q_target, self.target_hidden = self.target_rnn(
-                inputs_next, self.target_hidden)
+            q_target, self.target_hidden = self.target_rnn(inputs_next, self.target_hidden)
 
             # 把q_eval维度重新变回(episode_num, n_agents, n_actions)
             q_eval = q_eval.view(episode_num, self.n_agents, -1)
@@ -191,24 +172,18 @@ class VDN:
 
     def init_hidden(self, episode_num):
         # 为每个episode中的每个agent都初始化一个eval_hidden、target_hidden
-        self. eval_hidden = torch.zeros(
-            (episode_num, self.n_agents, self.args.rnn_hidden_dim))
-        self.target_hidden = torch.zeros(
-            (episode_num, self.n_agents, self.args.rnn_hidden_dim))
+        self. eval_hidden = torch.zeros((episode_num, self.n_agents, self.args.rnn_hidden_dim))
+        self.target_hidden = torch.zeros((episode_num, self.n_agents, self.args.rnn_hidden_dim))
 
     def save_model(self, train_step):
         num = str(train_step)
         if not os.path.exists(self.model_dir):
             os.makedirs(self.model_dir)
-        torch.save(self.eval_vdn_net.state_dict(),
-                   self.model_dir + '/' + num + '_vdn_net_params.pkl')
-        torch.save(self.eval_rnn.state_dict(), self.model_dir +
-                   '/' + num + '_rnn_net_params.pkl')
-
+        torch.save(self.eval_vdn_net.state_dict(), self.model_dir + '/' + num + '_vdn_net_params.pkl')
+        torch.save(self.eval_rnn.state_dict(), self.model_dir + '/' + num + '_rnn_net_params.pkl')
+    
     def save_final_model(self):
         if not os.path.exists(self.model_dir):
             os.makedirs(self.model_dir)
-        torch.save(self.eval_vdn_net.state_dict(),
-                   self.model_dir + '/' + 'vdn_net_params.pkl')
-        torch.save(self.eval_rnn.state_dict(),
-                   self.model_dir + '/' + 'rnn_net_params.pkl')
+        torch.save(self.eval_vdn_net.state_dict(), self.model_dir + '/' + 'vdn_net_params.pkl')
+        torch.save(self.eval_rnn.state_dict(), self.model_dir + '/' + 'rnn_net_params.pkl')

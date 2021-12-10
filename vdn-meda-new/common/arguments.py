@@ -15,7 +15,7 @@ def get_common_args():
     parser.add_argument('--alg', type=str, default='vdn',
                         help='the algorithm to train the agent')
     parser.add_argument('--n_steps', type=int,
-                        default=4000000, help='total time steps')
+                        default=2000000, help='total time steps')
     parser.add_argument('--n_episodes', type=int, default=10,
                         help='the number of episodes before once training')
     parser.add_argument('--last_action', default=True, action='store_false',
@@ -29,7 +29,7 @@ def get_common_args():
     parser.add_argument('--optimizer', type=str,
                         default="ADAM", help='optimizer')
     parser.add_argument('--evaluate_cycle', type=int,
-                        default=50000, help='how often to evaluate the model')
+                        default=100000, help='how often to evaluate the model')
     parser.add_argument('--evaluate_epoch', type=int, default=100,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--model_dir', type=str,

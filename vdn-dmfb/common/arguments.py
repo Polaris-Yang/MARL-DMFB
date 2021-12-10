@@ -15,7 +15,7 @@ def get_common_args():
     parser.add_argument('--alg', type=str, default='vdn',
                         help='the algorithm to train the agent')
     parser.add_argument('--n_steps', type=int,
-                        default=3000000, help='total time steps')
+                        default=8000000, help='total time steps')
     parser.add_argument('--n_episodes', type=int, default=10,
                         help='the number of episodes before once training')
     parser.add_argument('--last_action', default=True, action='store_false',
@@ -29,8 +29,8 @@ def get_common_args():
     parser.add_argument('--optimizer', type=str,
                         default="ADAM", help='optimizer')
     parser.add_argument('--evaluate_cycle', type=int,
-                        default=20000, help='how often to evaluate the model')
-    parser.add_argument('--evaluate_epoch', type=int, default=200,
+                        default=100000, help='how often to evaluate the model')
+    parser.add_argument('--evaluate_epoch', type=int, default=100,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--model_dir', type=str,
                         default='./model', help='model directory of the policy')
@@ -45,7 +45,7 @@ def get_common_args():
     parser.add_argument('--stall', default=True, action='store_false',
                         help='whether the droplet can move or not after reach the target')
     parser.add_argument('--chip_size', type=int, default=10, help='chip_size')
-    parser.add_argument('--drop_num', type=int, default=4,
+    parser.add_argument('--drop_num', type=int, default=2,
                         help='the number of droplet')
     parser.add_argument('--block_num', type=int, default=0,
                         help='the number of block')
@@ -73,11 +73,11 @@ def get_mixer_args(args):
     args.epsilon_anneal_scale = 'step'
 
     # the number of the train steps in one epoch
-    args.train_steps = 5
+    args.train_steps = 4
 
     # experience replay
     args.batch_size = 128
-    args.buffer_size = int(2e4)
+    args.buffer_size = int(1e4)
 
     # how often to save the model
     args.save_cycle = 5000

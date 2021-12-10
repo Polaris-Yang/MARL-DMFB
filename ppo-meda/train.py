@@ -57,7 +57,7 @@ def runAnExperiment(args, path_log, env, repeat_num):
     for i in range(args.start_iters+1, args.stop_iters + 1):
         print("### Start training the iteration %d" %(i))
         model.learn(total_timesteps = args.n_timesteps)
-        if path_log and i%2 == 0:
+        if path_log and i%5 == 0:
             model_name = '_'.join(['repeat', str(repeat_num), 'training', str(i), str(args.n_timesteps)])
             model.save(os.path.join(path_log, model_name))
 
@@ -65,7 +65,7 @@ def expSeveralRuns(args=None, path_log=None):
 
     showIsGPU()
 
-    for repeat in range(3, 5):
+    for repeat in range(1, args.n_repeat+1):
         print("### In repeat %d" %(repeat))
         start_time = time.time()
         env = MEDAEnv(w=args.width, l=args.length, n_agents=args.n_agents,
@@ -87,18 +87,18 @@ def get_parser():
     # rl training
     parser.add_argument('--method', help='The method use for rl training (centralized, sharing, concurrent)',
                         type=str, default='concurrent', choices=['centralized', 'sharing', 'concurrent'])
-    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=4)
+    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=10)
     parser.add_argument('--start-iters', help='Number of iterations the initialized model has been trained',
                         type=int, default=0)
     parser.add_argument('--stop-iters', help='Total number of iterations (including pre-train) for one repeat of the experiment',
-                        type=int, default=150)
+                        type=int, default=100)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
 
     # env settings
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 30)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 60)
-    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 4)
+    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
     parser.add_argument('--b-degrade', action = "store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
 
