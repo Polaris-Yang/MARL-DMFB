@@ -87,7 +87,7 @@ def get_parser():
     parser.add_argument('--start-iters', help='Number of iterations the initialized model has been trained',
                         type=int, default=0)
     parser.add_argument('--stop-iters', help='Total number of iterations (including pre-train) for one repeat of the experiment',
-                        type=int, default=400)
+                        type=int, default=450)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
 
@@ -97,7 +97,7 @@ def get_parser():
     parser.add_argument(
         '--length', help='Length of the biochip', type=int, default=10)
     parser.add_argument(
-        '--n-agents', help='Number of agents', type=int, default=2)
+        '--n-agents', help='Number of agents', type=int, default=3)
     parser.add_argument('--b-degrade', action="store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type=float, default=0)
 
