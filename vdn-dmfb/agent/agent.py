@@ -31,8 +31,6 @@ class Agents:
         if self.args.reuse_network:
             inputs = np.hstack((inputs, agent_id))
         hidden_state = self.policy.eval_hidden[:, agent_num, :]
-
-        # transform the shape of inputs from (42,) to (1,42)
         inputs = torch.tensor(inputs, dtype=torch.float32).unsqueeze(0)
         avail_actions = torch.tensor(avail_actions, dtype=torch.float32).unsqueeze(0)
         if self.args.cuda:
@@ -40,11 +38,8 @@ class Agents:
             hidden_state = hidden_state.cuda()
 
         # get q value
-
         q_value, self.policy.eval_hidden[:, agent_num, :] = self.policy.eval_rnn(inputs, hidden_state)
-
         # choose action from q value
-
         q_value[avail_actions == 0.0] = - float("inf")
         if np.random.uniform() < epsilon:
             action = np.random.choice(avail_actions_ind)  # action是一个整数
@@ -52,28 +47,6 @@ class Agents:
             action = torch.argmax(q_value)
         return action
 
-    def _choose_action_from_softmax(self, inputs, avail_actions, epsilon, evaluate=False):
-        """
-        :param inputs: # q_value of all actions
-        """
-        action_num = avail_actions.sum(dim=1, keepdim=True).float().repeat(1, avail_actions.shape[
-            -1])  # num of avail_actions
-        # 先将Actor网络的输出通过softmax转换成概率分布
-        prob = torch.nn.functional.softmax(inputs, dim=-1)
-        # add noise of epsilon
-        prob = ((1 - epsilon) * prob + torch.ones_like(prob) * epsilon / action_num)
-        prob[avail_actions == 0] = 0.0  # 不能执行的动作概率为0
-
-        """
-        不能执行的动作概率为0之后，prob中的概率和不为1，这里不需要进行正则化，因为torch.distributions.Categorical
-        会将其进行正则化。要注意在训练的过程中没有用到Categorical，所以训练时取执行的动作对应的概率需要再正则化。
-        """
-
-        if epsilon == 0 and evaluate:
-            action = torch.argmax(prob)
-        else:
-            action = Categorical(prob).sample().long()
-        return action
 
     def _get_max_episode_len(self, batch):
         terminated = batch['terminated']

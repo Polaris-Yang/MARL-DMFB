@@ -115,7 +115,6 @@ class ConcurrentAgentEnv(gym.Env):
         return obs, reward, done, {}
 
     def reset(self):
-        #print('### Resetting task', self.agent_index, '...')
         self.count = 0
         self.env.routing_manager.resetTask(self.agent_index)
         self.env.updateHealth()
@@ -159,14 +158,4 @@ class ConcurrentAgentEnv(gym.Env):
             if np.linalg.norm(past_pisition[i] - cur_position[self.agent_index]) < 2:
                 dynamic_conflict += 1
         return dynamic_conflict
-if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    p_env = DMFBenv(10, 10, 2)
 
-    # 1. Decentralized and concurrent learning
-    trainer = DecentrailizedTrainer(VggCnnPolicy, p_env, 'PPO', True)
-    trainer.learn(1000)
-    print(trainer)
-    print(trainer.models)
-    print(trainer.p_env)

@@ -36,8 +36,6 @@ class CRNN(nn.Module):
     def forward(self, inputs, hidden_state):
         pixel, vec = torch.split(
             inputs, [9*9*4, self.args.n_agents+self.args.n_actions+2], dim=1)
-        pixel = pixel.cuda()
-        vec = vec.cuda()
         pixel = pixel.reshape((-1, 4, 9, 9))
         pixel = f.relu(self.conv1(pixel))
         pixel = f.relu(self.conv2(pixel))
