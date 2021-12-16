@@ -458,6 +458,7 @@ class DMFBenv(ParallelEnv):
         self.step_count = 0
         self.constraints = 0
         self.routing_manager.refresh()
+        self.updateHealth()
         obs = self.getObs()
         return obs
 
@@ -522,24 +523,4 @@ class DMFBenv(ParallelEnv):
     def render(self, mode='human', close=False):
         pass
 
-
-if __name__ == '__main__':
-    # a test
-    l = 5
-    w = 5
-    agent_num = 2
-    block_num = 0
-    env = DMFBenv(w, l, agent_num, block_num,b_degrade=True)
-    print(env.routing_manager.droplets)
-    agents = ['player_{}'.format(i) for i in range(agent_num)]
-    # for i in range(1):
-    #     env.reset()
-    #     for j in range(10):
-    #         actions = {
-    #             agent_name: env.action_spaces[agent_name].sample() for agent_name in agents}
-    #         obs, reward_n, _, info_n = env.step(actions)
-    #         print('-----------------')
-    #         print(reward_n)
-    env.routing_manager.resetTask(0)
-    print(env.routing_manager.droplets)
 

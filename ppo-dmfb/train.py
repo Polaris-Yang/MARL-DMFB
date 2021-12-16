@@ -97,7 +97,7 @@ def get_parser():
     parser.add_argument(
         '--length', help='Length of the biochip', type=int, default=10)
     parser.add_argument(
-        '--n-agents', help='Number of agents', type=int, default=3)
+        '--n-agents', help='Number of agents', type=int, default=4)
     parser.add_argument('--b-degrade', action="store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type=float, default=0)
 

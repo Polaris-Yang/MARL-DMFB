@@ -657,26 +657,3 @@ class DMFBenv(ParallelEnv):
         return self.viewer.render() if mode == 'human' else img
 
 
-if __name__ == '__main__':
-    # a test
-    l = 10
-    w = 10
-    agent_num = 4
-    block_num = 2
-    env = Dropletenv(w, l, agent_num, block_num)
-    agents = ['player_{}'.format(i) for i in range(agent_num)]
-    for i in range(1):
-        env.reset()
-        for j in range(1):
-            actions = {
-                agent_name: env.action_spaces[agent_name].sample() for agent_name in agents}
-            reward_n, done_n, _, info_n = env.step(actions)
-            print('-----------------')
-            # print(reward_n)
-            print(env.getAgent_i_obs(0))
-            print(env.routing_manager.getglobalobs())
-            env.render()
-            # time.sleep(0.5)
-            # print(done_n)
-            # print(reward_n)
-    env.close()

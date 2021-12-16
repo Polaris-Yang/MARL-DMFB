@@ -48,11 +48,11 @@ def EvaluateAgent(args, env, obs, agent, centralized = True):
 
 def evaluateOnce(args, path_log, env, repeat_num):
     algo = ALGOS[args.algo]
-    len_results = (args.stop_iters - args.start_iters)//5 + 1
+    len_results = args.evaluate_epoch
     results = {'multistep': [0]*len_results, 'multi': [0]*len_results,'success':[0]*len_results}
     for i in range(len_results):
-        print('### Evaluating iteration %d' %(i*5))
-        model_name = '_'.join(['repeat', str(repeat_num), 'training', str(i*5), str(args.n_timesteps)])
+        print('### Evaluating iteration %d' %(i))
+        model_name = '_'.join(['repeat', '1', 'training', '250', '20000'])
         path_multi = os.path.join(path_log, model_name)
         if args.method == 'centralized':
             multi_agent = algo.load(path_multi)
@@ -63,26 +63,23 @@ def evaluateOnce(args, path_log, env, repeat_num):
                     multi_agent[agent] = algo.load(path_multi+'_c{}'.format(agent_index))
                 else:
                     multi_agent[agent] = algo.load(path_multi+'shared')
-        for j in range(args.n_evaluate):
-            if j%5 == 0:
-                print('### Episode %d.'%j)
+        for j in range(args.evaluate_episode):
             obs = env.reset()
             routing_manager = env.routing_manager
             eposideR,success,step = EvaluateAgent(args, env, obs, multi_agent, args.method == 'centralized')
             results['multi'][i] += eposideR
             results['success'][i]  += success
             results['multistep'][i]+= step
-        results['multi'][i] /= args.n_evaluate
-        results['success'][i] /= args.n_evaluate
-        results['multistep'][i] /= args.n_evaluate
+        results['multi'][i] /= args.evaluate_episode
+        results['success'][i] /= args.evaluate_episode
+        results['multistep'][i] /= args.evaluate_episode
     return results
 
 def save_evaluation(agent_rewards, filename, path_log):
     # with open(os.path.join(path_log, filename), 'w') as agent_log:
     #     writer_agent = csv.writer(agent_log)
-    #     writer_agent.writerows(agent_rewards)
-    filepath = path_log+ "/" + filename
-    np.save(filepath,agent_rewards)
+    #     writer_agent.writerows(agent_rewards)filename
+    np.save(filename,agent_rewards)
 
 def evaluateSeveralTimes(args=None, path_log=None):
     showIsGPU()
@@ -93,7 +90,7 @@ def evaluateSeveralTimes(args=None, path_log=None):
         print("### In repeat %d" %(repeat))
         start_time = time.time()
         env = DMFBenv(width=args.width, length=args.length, n_agents=args.n_agents,n_blocks=0,
-                      b_degrade=args.b_degrade, per_degrade = args.per_degrade)
+                      b_degrade=True, per_degrade = 0.5)
         results = evaluateOnce(args, path_log, env, repeat_num=repeat)
         print("### Repeat %s costs %s seconds ###" %(str(repeat), time.time() - start_time))
         multi_rewards.append(results['multi'])
@@ -113,22 +110,22 @@ def get_parser():
     # rl training
     parser.add_argument('--method', help='The method use for rl training (centralized, sharing, concurrent)',
                         type=str, default='concurrent', choices=['centralized', 'sharing', 'concurrent'])
-    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=5)
-    parser.add_argument('--start-iters', help='Number of iterations the initialized model has been trained',
-                        type=int, default=0)
-    parser.add_argument('--stop-iters', help='Total number of iterations (including pre-train) for one repeat of the experiment',
-                        type=int, default=450)
+    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=1)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
     # env settings
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 10)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 10)
-    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 3)
+    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
     parser.add_argument('--b-degrade', action = "store_true")
-    parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
+    parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0.5)
     # rl evaluate
     parser.add_argument('--n-evaluate', help='Number of episodes to evaluate the model for each iteration',
                         type=int, default=100)
+    parser.add_argument('--evaluate_epoch', type=int, default=30,
+                        help='number of the epoch to evaluate the agent')
+    parser.add_argument('--evaluate_episode', type=int, default=500,
+                        help='number of the epoch to evaluate the agent')
     return parser
 
 def main(args=None):
