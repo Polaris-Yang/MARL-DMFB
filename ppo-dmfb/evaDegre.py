@@ -27,7 +27,6 @@ def showIsGPU():
         print("### Training on CPUs... ###")
 
 def EvaluateAgent(args, env, obs, agent, centralized = True):
-    obs = env.restart()
     episode_reward = 0.0
     done, state = False, None
     step = 0
@@ -90,7 +89,7 @@ def evaluateSeveralTimes(args=None, path_log=None):
         print("### In repeat %d" %(repeat))
         start_time = time.time()
         env = DMFBenv(width=args.width, length=args.length, n_agents=args.n_agents,n_blocks=0,
-                      b_degrade=True, per_degrade = 0.5)
+                      b_degrade=True, per_degrade =args.per_degrade)
         results = evaluateOnce(args, path_log, env, repeat_num=repeat)
         print("### Repeat %s costs %s seconds ###" %(str(repeat), time.time() - start_time))
         multi_rewards.append(results['multi'])
@@ -110,7 +109,7 @@ def get_parser():
     # rl training
     parser.add_argument('--method', help='The method use for rl training (centralized, sharing, concurrent)',
                         type=str, default='concurrent', choices=['centralized', 'sharing', 'concurrent'])
-    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=1)
+    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=5)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
     # env settings
@@ -118,17 +117,18 @@ def get_parser():
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 10)
     parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
     parser.add_argument('--b-degrade', action = "store_true")
-    parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0.5)
+    parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 1.0)
     # rl evaluate
     parser.add_argument('--n-evaluate', help='Number of episodes to evaluate the model for each iteration',
                         type=int, default=100)
     parser.add_argument('--evaluate_epoch', type=int, default=30,
                         help='number of the epoch to evaluate the agent')
-    parser.add_argument('--evaluate_episode', type=int, default=500,
+    parser.add_argument('--evaluate_episode', type=int, default=400,
                         help='number of the epoch to evaluate the agent')
     return parser
 
 def main(args=None):
+    np.random.seed(1) 
     parser = get_parser()
     args = parser.parse_args(args)
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda

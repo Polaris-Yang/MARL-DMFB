@@ -4,6 +4,7 @@ import argparse
 from common.arguments import get_mixer_args
 import matplotlib.pyplot as plt
 from tqdm import tqdm, trange
+import numpy as np
 def getparameter():
     parser = argparse.ArgumentParser()
     # the environment setting
@@ -20,11 +21,11 @@ def getparameter():
                         help='whether to use one network for all agents')
     parser.add_argument('--gamma', type=float,
                         default=0.99, help='discount factor')
-    parser.add_argument('--cuda', default=True, action='store_false',
+    parser.add_argument('--cuda', default=False, action='store_false',
                         help='whether to use the GPU')
     parser.add_argument('--evaluate_epoch', type=int, default=30,
                         help='number of the epoch to evaluate the agent')
-    parser.add_argument('--evaluate_episode', type=int, default=500,
+    parser.add_argument('--evaluate_episode', type=int, default=400,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--model_dir', type=str,
                         default='./model', help='model directory of the policy')
@@ -117,18 +118,25 @@ class evaluator():
 if __name__ == '__main__':
     args = getparameter()
     args = get_mixer_args(args)
-    for i in range(1):    
+    t_rewads=[]
+    t_steps=[]
+    t_succe=[]
+    np.random.seed(1) 
+    for i in range(5):    
         env = DMFBenv(args.chip_size, args.chip_size, args.drop_num,
-                      args.block_num, fov=args.fov, stall=args.stall, b_degrade=True, per_degrade=0.5)
+                      args.block_num, fov=args.fov, stall=args.stall, b_degrade=True, per_degrade=1.0)
         env_info = env.get_env_info()
         args.n_actions = env_info["n_actions"]
         args.n_agents = env_info["n_agents"]
         args.obs_shape = env_info["obs_shape"]
         args.episode_limit = env_info["episode_limit"]
         Eva = evaluator(env,args)
-        a,b,c =Eva.evaluate()
-        np.save('a.npy',a)
-        np.save('b.npy',b)
-        np.save('c.npy',c)
+        rewards,steps,success =Eva.evaluate()
+        t_steps.append(steps)
+        t_succe.append(success)
+        t_rewads.append(rewards)
+    np.save('rewards.npy',t_rewads)
+    np.save('steps.npy',t_steps)
+    np.save('success.npy',t_succe)
 
 

@@ -137,6 +137,7 @@ def main(args=None):
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
     # the path to where log files will be saved
     # example path: log/30_60/PPO_SimpleCnnPolicy
+    np.random.seed(1) 
     path_log = os.path.join('log', args.method, str(args.width)+'_'+str(args.length),
             str(args.n_agents), args.algo+'_VggCnnPolicy')
     print('### Start evaluating algorithm %s'%(args.algo))

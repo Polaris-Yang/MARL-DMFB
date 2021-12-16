@@ -390,7 +390,7 @@ class DMFBenv(ParallelEnv):
     metadata = {'render.modes': ['human', 'rgb_array']}
     # 环境初始化
 
-    def __init__(self, width, length, n_agents, n_blocks=0, b_degrade=False, per_degrade=0.1):
+    def __init__(self, width, length, n_agents, n_blocks=0, b_degrade=False, per_degrade=0.5):
         super(DMFBenv, self).__init__()
         assert width >= 5 and length >= 5
         assert n_agents > 0
