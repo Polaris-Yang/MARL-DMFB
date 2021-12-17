@@ -482,7 +482,7 @@ class DMFBenv(ParallelEnv):
     def addUsage(self, is_state_change):
         done = self.routing_manager.getTaskStatus()
         for i in range(self.routing_manager.n_droplets):
-            if not done[i] and is_state_change[i]:
+            if not done[i]:
                 self.m_usage[self.routing_manager.droplets[i].y][self.routing_manager.droplets[i].x] += 1
 
     def updateHealth(self):

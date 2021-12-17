@@ -438,7 +438,7 @@ class RoutingTaskManager:
     def addUsage(self, is_state_change):
         done = self.getTaskStatus()
         for i in range(self.n_droplets):
-            if not done[i] and is_state_change[i]:
+            if not done[i]:
                 self.m_usage[self.droplets[i].y][self.droplets[i].x] += 1
 
     def updateHealth(self):
