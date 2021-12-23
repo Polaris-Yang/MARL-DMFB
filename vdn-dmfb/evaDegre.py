@@ -23,9 +23,9 @@ def getparameter():
                         default=0.99, help='discount factor')
     parser.add_argument('--cuda', default=True, action='store_false',
                         help='whether to use the GPU')
-    parser.add_argument('--evaluate_epoch', type=int, default=30,
+    parser.add_argument('--evaluate_epoch', type=int, default=20,
                         help='number of the epoch to evaluate the agent')
-    parser.add_argument('--evaluate_episode', type=int, default=400,
+    parser.add_argument('--evaluate_episode', type=int, default=100,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--model_dir', type=str,
                         default='./model', help='model directory of the policy')
@@ -121,16 +121,16 @@ if __name__ == '__main__':
     t_rewads=[]
     t_steps=[]
     t_succe=[]
-    np.random.seed(1)    
-    env = DMFBenv(args.chip_size, args.chip_size, args.drop_num,
-                    args.block_num, fov=args.fov, stall=args.stall, b_degrade=True, per_degrade=1.0)
-    env_info = env.get_env_info()
-    args.n_actions = env_info["n_actions"]
-    args.n_agents = env_info["n_agents"]
-    args.obs_shape = env_info["obs_shape"]
-    args.episode_limit = env_info["episode_limit"]
-    Eva = evaluator(env,args)
-    for i in range(5): 
+    np.random.seed(1) 
+    for i in range(5):    
+        env = DMFBenv(args.chip_size, args.chip_size, args.drop_num,
+                        args.block_num, fov=args.fov, stall=args.stall, b_degrade=True, per_degrade=1.0)
+        env_info = env.get_env_info()
+        args.n_actions = env_info["n_actions"]
+        args.n_agents = env_info["n_agents"]
+        args.obs_shape = env_info["obs_shape"]
+        args.episode_limit = env_info["episode_limit"]
+        Eva = evaluator(env,args)
         rewards,steps,success =Eva.evaluate()
         t_steps.append(steps)
         t_succe.append(success)

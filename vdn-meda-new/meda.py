@@ -236,6 +236,8 @@ class RoutingTaskManager:
         punish = self.calPunish()
         for i in range(len(rewards)):
             rewards[i] += punish[i]
+        if np.all(self.getTaskStatus()) == True:
+            rewards = [i+5 for i in rewards]
         return rewards, fail
 
     def moveOneDroplet(self, droplet_index, action, m_health,
@@ -260,7 +262,7 @@ class RoutingTaskManager:
                 self.droplets[i].move(action, self.width, self.length)
             new_dist = self.droplets[i].getDistance(self.destinations[i])
             if new_dist < goal_dist:  # get to the destination
-                reward = 1.0
+                reward = 0.0
             elif new_dist < self.distances[i]:  # closer to the destination
                 reward = -0.05
             else:
@@ -606,7 +608,7 @@ class MEDAEnv(ParallelEnv):
         Goal      - greed in layer 1
         Droplet   - blue in layer 2
         """
-        fov = 15
+        fov = 19
         obs = np.zeros(shape=(4, fov, fov))
         center_x = self.routing_manager.droplets[agent_index].x_center
         center_y = self.routing_manager.droplets[agent_index].y_center

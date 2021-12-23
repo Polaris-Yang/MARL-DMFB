@@ -67,7 +67,7 @@ def evaluateOnce(args, path_log, env, repeat_num):
             if j%5 == 0:
                 print('### Episode %d.'%j)
             obs = env.reset()
-            routing_manager = env.routing_manager
+            # routing_manager = env.routing_manager
             eposideR,success,step = EvaluateAgent(args, env, obs, multi_agent, args.method == 'centralized')
             results['multi'][i] += eposideR
             results['success'][i]  += success
@@ -123,7 +123,7 @@ def get_parser():
     # env settings
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 10)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 10)
-    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 3)
+    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 4)
     parser.add_argument('--b-degrade', action = "store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
     # rl evaluate

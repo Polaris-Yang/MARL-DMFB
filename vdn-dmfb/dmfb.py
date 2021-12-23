@@ -284,9 +284,7 @@ class RoutingTaskManager:
         if np.all(self.getTaskStatus()) == True:
             rewards = [i+20 for i in rewards]
         rewards = list(rewards)
-        position_change = list(
-            np.all((np.array(curs) == np.array(pasts)), axis=1))
-        self.addUsage(position_change)
+        self.addUsage()
         return rewards, constraints
 
     def _isTouchingBlocks(self, point):
@@ -435,7 +433,7 @@ class RoutingTaskManager:
         obs_i = np.append(obs_i, dir)
         return obs_i
 
-    def addUsage(self, is_state_change):
+    def addUsage(self):
         done = self.getTaskStatus()
         for i in range(self.n_droplets):
             if not done[i]:

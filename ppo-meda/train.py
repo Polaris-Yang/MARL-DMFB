@@ -87,18 +87,18 @@ def get_parser():
     # rl training
     parser.add_argument('--method', help='The method use for rl training (centralized, sharing, concurrent)',
                         type=str, default='concurrent', choices=['centralized', 'sharing', 'concurrent'])
-    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=10)
+    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=5)
     parser.add_argument('--start-iters', help='Number of iterations the initialized model has been trained',
                         type=int, default=0)
     parser.add_argument('--stop-iters', help='Total number of iterations (including pre-train) for one repeat of the experiment',
-                        type=int, default=100)
+                        type=int, default=200)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
 
     # env settings
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 30)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 60)
-    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
+    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 3)
     parser.add_argument('--b-degrade', action = "store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
 

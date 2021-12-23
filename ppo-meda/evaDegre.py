@@ -13,7 +13,7 @@ from stable_baselines.common import make_vec_env
 from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines import PPO2, ACER, DQN
-from dmfb import*
+from meda import*
 from my_net import VggCnnPolicy, DqnVggCnnPolicy
 from utilities import DecentrailizedTrainer, ConcurrentAgentEnv
 import csv
@@ -48,10 +48,11 @@ def EvaluateAgent(args, env, obs, agent, centralized = True):
 def evaluateOnce(args, path_log, env, repeat_num):
     algo = ALGOS[args.algo]
     len_results = args.evaluate_epoch
-    results = {'multistep': [0]*len_results, 'multi': [0]*len_results,'success':[0]*len_results}
+    results = {'multistep': [0]*len_results, 'multi': [0]*len_results,'success':[0]*len_results,
+               'baseline': [0]*len_results,'basestep':[0]*len_results}
     for i in range(len_results):
         print('### Evaluating iteration %d' %(i))
-        model_name = '_'.join(['repeat', '1', 'training', '250', '20000'])
+        model_name = '_'.join(['repeat', '1', 'training', '100', '20000'])
         path_multi = os.path.join(path_log, model_name)
         if args.method == 'centralized':
             multi_agent = algo.load(path_multi)
@@ -62,14 +63,19 @@ def evaluateOnce(args, path_log, env, repeat_num):
                     multi_agent[agent] = algo.load(path_multi+'_c{}'.format(agent_index))
                 else:
                     multi_agent[agent] = algo.load(path_multi+'shared')
+        baseline_agent = BaseLineRouter(args.width, args.length)
         for j in range(args.evaluate_episode):
             obs = env.reset()
             routing_manager = env.routing_manager
+            results['baseline'][i] += baseline_agent.getEstimatedReward(routing_manager,env.m_health)[0]
+            results['basestep'][i] += baseline_agent.getEstimatedReward(routing_manager,env.m_health)[1]
             eposideR,success,step = EvaluateAgent(args, env, obs, multi_agent, args.method == 'centralized')
             results['multi'][i] += eposideR
             results['success'][i]  += success
             results['multistep'][i]+= step
         results['multi'][i] /= args.evaluate_episode
+        results['baseline'][i] /= args.n_evaluate
+        results['basestep'][i] /= args.n_evaluate
         results['success'][i] /= args.evaluate_episode
         results['multistep'][i] /= args.evaluate_episode
     return results
@@ -83,19 +89,25 @@ def save_evaluation(agent_rewards, filename, path_log):
 def evaluateSeveralTimes(args=None, path_log=None):
     showIsGPU()
     multi_rewards = []
+    baseline_rewards = []
     success=[]
     multisteps=[]
+    basesteps=[]
     for repeat in range(1, args.n_repeat+1):
         print("### In repeat %d" %(repeat))
         start_time = time.time()
-        env = DMFBenv(width=args.width, length=args.length, n_agents=args.n_agents,n_blocks=0,
-                      b_degrade=True, per_degrade =args.per_degrade)
+        env = MEDAEnv(w=args.width, l=args.length, n_agents=args.n_agents,
+                      b_degrade= True, per_degrade = args.per_degrade)
         results = evaluateOnce(args, path_log, env, repeat_num=repeat)
         print("### Repeat %s costs %s seconds ###" %(str(repeat), time.time() - start_time))
         multi_rewards.append(results['multi'])
+        baseline_rewards.append(results['baseline'])
         success.append(results['success'])
         multisteps.append(results['multistep'])
+        basesteps.append(results['basestep'])
     save_evaluation(multi_rewards, 'multi_rewards.npy', path_log)
+    save_evaluation(baseline_rewards, 'baseline_rewards.npy', path_log)
+    save_evaluation(basesteps,'basesteps.npy',path_log)
     save_evaluation(multisteps,'muti_steps.npy',path_log)
     save_evaluation(success,'success_rate.npy',path_log)
 def get_parser():
@@ -109,12 +121,12 @@ def get_parser():
     # rl training
     parser.add_argument('--method', help='The method use for rl training (centralized, sharing, concurrent)',
                         type=str, default='concurrent', choices=['centralized', 'sharing', 'concurrent'])
-    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=5)
+    parser.add_argument('--n-repeat', help='Number of repeats for the experiment', type=int, default=1)
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
     # env settings
-    parser.add_argument('--width', help='Width of the biochip', type = int, default = 10)
-    parser.add_argument('--length', help='Length of the biochip', type = int, default = 10)
+    parser.add_argument('--width', help='Width of the biochip', type = int, default = 30)
+    parser.add_argument('--length', help='Length of the biochip', type = int, default = 60)
     parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
     parser.add_argument('--b-degrade', action = "store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 1.0)
@@ -123,7 +135,7 @@ def get_parser():
                         type=int, default=100)
     parser.add_argument('--evaluate_epoch', type=int, default=20,
                         help='number of the epoch to evaluate the agent')
-    parser.add_argument('--evaluate_episode', type=int, default=100,
+    parser.add_argument('--evaluate_episode', type=int, default=230,
                         help='number of the epoch to evaluate the agent')
     return parser
 
