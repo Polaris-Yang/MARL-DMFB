@@ -488,9 +488,10 @@ class DMFBenv(ParallelEnv):
     def updateHealth(self):
         if not self.b_degrade:
             return
-        index = self.m_usage > 50.0  # degrade here
-        self.m_health[index] = self.m_health[index] * self.m_degrade[index]
-        self.m_usage[index] = 0
+        self.m_health = np.exp((self.m_usage/50)*np.log(self.m_degrade))
+        # index = self.m_usage > 50.0  # degrade here
+        # self.m_health[index] = self.m_health[index] * self.m_degrade[index]
+        # self.m_usage[index] = 0
 
     def getOneObs(self, agent_index):
         """

@@ -1,3 +1,4 @@
+from numpy.core.fromnumeric import size
 from dmfb import*
 from agent.agent import Agents
 import argparse
@@ -107,12 +108,15 @@ class evaluator():
         epoch_rewards = []
         epoch_steps = []
         epoch_success = []
+        health= np.zeros((args.evaluate_epoch,env.width,env.length))
         for epoch in trange(args.evaluate_epoch):
+            print(self.env.routing_manager.m_health)
+            health[epoch]=self.env.routing_manager.m_health
             rewards, steps, success = self.evaluateOneEpoch()
             epoch_rewards.append(rewards)
             epoch_steps.append(steps)
             epoch_success.append(success)
-        return epoch_rewards, epoch_steps, epoch_success
+        return epoch_rewards, epoch_steps, epoch_success,health
 
 
 if __name__ == '__main__':
@@ -121,22 +125,28 @@ if __name__ == '__main__':
     t_rewads=[]
     t_steps=[]
     t_succe=[]
+    health = []
     np.random.seed(1) 
     for i in range(5):    
-        env = DMFBenv(args.chip_size, args.chip_size, args.drop_num,
-                        args.block_num, fov=args.fov, stall=args.stall, b_degrade=True, per_degrade=1.0)
+        env = DMFBenv(args.chip_size, args.chip_size, args.drop_num,args.block_num, fov=args.fov, stall=args.stall, b_degrade=True, per_degrade=1.0)
         env_info = env.get_env_info()
         args.n_actions = env_info["n_actions"]
         args.n_agents = env_info["n_agents"]
         args.obs_shape = env_info["obs_shape"]
         args.episode_limit = env_info["episode_limit"]
         Eva = evaluator(env,args)
-        rewards,steps,success =Eva.evaluate()
+        rewards,steps,success,healthy =Eva.evaluate()
         t_steps.append(steps)
         t_succe.append(success)
         t_rewads.append(rewards)
-    np.save('rewards.npy',t_rewads)
-    np.save('steps.npy',t_steps)
-    np.save('success.npy',t_succe)
+        health.append(healthy)
+    path = 'DegreData' + '/' + str(args.drop_num)+'/'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    health = np.asanyarray(health)
+    np.save(path+'rewards.npy',t_rewads)
+    np.save(path+'steps.npy',t_steps)
+    np.save(path+'success.npy',t_succe)
+    np.save(path+'health.npy',health)
 
 

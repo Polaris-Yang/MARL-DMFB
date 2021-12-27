@@ -74,10 +74,14 @@ def evaluateOnce(args, path_log, env, repeat_num):
         results['multistep'][i] /= args.evaluate_episode
     return results
 
-def save_evaluation(agent_rewards, filename, path_log):
+def save_evaluation(agent_rewards, filename, args):
     # with open(os.path.join(path_log, filename), 'w') as agent_log:
     #     writer_agent = csv.writer(agent_log)
     #     writer_agent.writerows(agent_rewards)filename
+    path = 'DegreData'+'/'+ str(args.n_agents)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    filename = path +'/'+ filename
     np.save(filename,agent_rewards)
 
 def evaluateSeveralTimes(args=None, path_log=None):
@@ -95,9 +99,9 @@ def evaluateSeveralTimes(args=None, path_log=None):
         multi_rewards.append(results['multi'])
         success.append(results['success'])
         multisteps.append(results['multistep'])
-    save_evaluation(multi_rewards, 'multi_rewards.npy', path_log)
-    save_evaluation(multisteps,'muti_steps.npy',path_log)
-    save_evaluation(success,'success_rate.npy',path_log)
+    save_evaluation(multi_rewards, 'multi_rewards.npy', args)
+    save_evaluation(multisteps,'muti_steps.npy',args)
+    save_evaluation(success,'success_rate.npy',args)
 def get_parser():
     """
     Creates an argument parser.
