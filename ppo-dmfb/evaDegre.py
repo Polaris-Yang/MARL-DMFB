@@ -119,13 +119,13 @@ def get_parser():
     # env settings
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 10)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 10)
-    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
+    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 3)
     parser.add_argument('--b-degrade', action = "store_true")
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 1.0)
     # rl evaluate
     parser.add_argument('--n-evaluate', help='Number of episodes to evaluate the model for each iteration',
                         type=int, default=100)
-    parser.add_argument('--evaluate_epoch', type=int, default=20,
+    parser.add_argument('--evaluate_epoch', type=int, default=10,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--evaluate_episode', type=int, default=100,
                         help='number of the epoch to evaluate the agent')

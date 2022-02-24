@@ -24,7 +24,7 @@ def getparameter():
                         default=0.99, help='discount factor')
     parser.add_argument('--cuda', default=True, action='store_false',
                         help='whether to use the GPU')
-    parser.add_argument('--evaluate_epoch', type=int, default=20,
+    parser.add_argument('--evaluate_epoch', type=int, default=10,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--evaluate_episode', type=int, default=100,
                         help='number of the epoch to evaluate the agent')
@@ -35,7 +35,7 @@ def getparameter():
     parser.add_argument('--stall', default=True, action='store_false',
                         help='whether the droplet can move or not after reach the target')
     parser.add_argument('--chip_size', type=int, default=10, help='chip_size')
-    parser.add_argument('--drop_num', type=int, default=2,
+    parser.add_argument('--drop_num', type=int, default=3,
                         help='the number of droplet')
     parser.add_argument('--block_num', type=int, default=0,
                         help='the number of block')
