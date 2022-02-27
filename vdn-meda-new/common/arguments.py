@@ -42,8 +42,8 @@ def get_common_args():
                         help='whether to evaluate the model')
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 30)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 60)
-    parser.add_argument('--drop_num', type=int, default=3,help='the number of droplet')
-    parser.add_argument('--b-degrade', action = "store_true")
+    parser.add_argument('--drop_num', type=int, default=2,help='the number of droplet')
+    parser.add_argument('--b-degrade', default=True)
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
     args = parser.parse_args()
     return args
@@ -52,7 +52,7 @@ def get_common_args():
 # arguments of vnd、 qmix
 def get_mixer_args(args):
     # network
-    args.rnn_hidden_dim = 256
+    args.rnn_hidden_dim = 128
     args.qmix_hidden_dim = 32
     args.two_hyper_layers = True
     args.hyper_hidden_dim = 32
