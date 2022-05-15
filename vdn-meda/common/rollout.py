@@ -11,7 +11,6 @@ class RolloutWorker:
         self.episode_limit = args.episode_limit
         self.n_actions = args.n_actions
         self.n_agents = args.n_agents
-        # self.state_shape = args.state_shape
         self.obs_shape = args.obs_shape
         self.args = args
         self.epsilon = args.epsilon
@@ -39,7 +38,6 @@ class RolloutWorker:
         while not terminated:
             obs = self.env.getObs()
             obs = [obs[agent] for agent in self.env.agents]
-            # state = self.env.get_state()
             actions, avail_actions, actions_onehot = [], [], []
             for agent_id in range(self.n_agents):
                 avail_action = [1] * self.n_actions
@@ -58,7 +56,6 @@ class RolloutWorker:
             reward = np.sum([reward[agent] for agent in self.env.agents]) / len(reward)
             terminated = np.all([terminated[agent] for agent in self.env.agents])
             o.append(obs)
-            # s.append(state)
             u.append(np.reshape(actions, [self.n_agents, 1]))
             u_onehot.append(actions_onehot)
             avail_u.append(avail_actions)
@@ -71,13 +68,9 @@ class RolloutWorker:
         # last obs
         obs = self.env.getObs()
         obs = [obs[agent] for agent in self.env.agents]
-        # state = self.env.getOneObs(0).reshape(-1)
         o.append(obs)
-        # s.append(state)
         o_next = o[1:]
-        # s_next = s[1:]
         o = o[:-1]
-        # s = s[:-1]
         # get avail_action for last obs，because target_q needs avail_action in training
         avail_actions = []
         for agent_id in range(self.n_agents):

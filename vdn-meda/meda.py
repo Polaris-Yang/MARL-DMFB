@@ -228,11 +228,16 @@ class RoutingTaskManager:
             raise RuntimeError("The number of actions is not the same"
                                " as n_droplets")
         rewards = []
-        fail=0
+        fail = 0
         for i in range(self.n_droplets):
             rewards.append(self.moveOneDroplet(i, actions[i], m_health))
         if self.isMixing():
-            fail=1
+            fail = 1
+        punish = self.calPunish()
+        for i in range(len(rewards)):
+            rewards[i] += punish[i]
+        if np.all(self.getTaskStatus()) == True:
+            rewards = [i+5 for i in rewards]
         return rewards, fail
 
     def moveOneDroplet(self, droplet_index, action, m_health,
@@ -257,14 +262,12 @@ class RoutingTaskManager:
                 self.droplets[i].move(action, self.width, self.length)
             new_dist = self.droplets[i].getDistance(self.destinations[i])
             if new_dist < goal_dist:  # get to the destination
-                reward = 1.0
+                reward = 0.0
             elif new_dist < self.distances[i]:  # closer to the destination
                 reward = -0.05
             else:
                 reward = -0.1  # penalty for taking one more step
             self.distances[i] = new_dist
-            if self.tooCloseToOthers(i):
-                reward -= 0.8
         return reward
 
     def _waitOtherActions(self, index):
@@ -293,10 +296,21 @@ class RoutingTaskManager:
             if real_dst < 1.5 * safe_dst:
                 return True
         return False
-    
+
+    def calPunish(self):
+        punish = [0]*self.n_droplets
+        for i in range(self.n_droplets-1):
+            for j in range(i+1, self.n_droplets):
+                safe_dst = self.droplets[i].radius + self.droplets[j].radius
+                real_dst = self.droplets[i].getDistance(self.droplets[j])
+                if real_dst < 1.5 * safe_dst:
+                    punish[i] -= 0.8
+                    punish[j] -= 0.8
+        return punish
+
     def isMixing(self):
         for i in range(self.n_droplets-1):
-            for j in range(i+1,self.n_droplets):
+            for j in range(i+1, self.n_droplets):
                 safe_dst = self.droplets[i].radius + self.droplets[j].radius
                 real_dst = self.droplets[i].getDistance(self.droplets[j])
                 if real_dst <= safe_dst:
@@ -468,22 +482,21 @@ class MEDAEnv(ParallelEnv):
             self.m_degrade = np.ones((w, l))
         # variables below change every game
 
-
     def step(self, actions):
         self.step_count += 1
-        success=0
+        success = 0
         if isinstance(actions, dict):
             acts = [actions[agent] for agent in self.agents]
         elif isinstance(actions, list):
             acts = actions
-        rewards,fail = self.routing_manager.moveDroplets(acts, self.m_health)
+        rewards, fail = self.routing_manager.moveDroplets(acts, self.m_health)
         self.fails += fail
         for key, r in zip(self.agents, rewards):
             self.rewards[key] = r
         obs = self.getObs()
         if self.step_count < self.max_step:
             status = self.routing_manager.getTaskStatus()
-            if np.all(status) and self.fails==0:
+            if np.all(status) and self.fails == 0:
                 success = 1
             for key, s in zip(self.agents, status):
                 self.dones[key] = s
@@ -491,7 +504,7 @@ class MEDAEnv(ParallelEnv):
         else:
             for key in self.agents:
                 self.dones[key] = True
-        return obs, self.rewards, self.dones, {'success':success}
+        return obs, self.rewards, self.dones, {'success': success}
 
     def reset(self):
         self.rewards = {i: 0. for i in self.agents}
@@ -595,36 +608,65 @@ class MEDAEnv(ParallelEnv):
         Goal      - greed in layer 1
         Droplet   - blue in layer 2
         """
-        obs = np.zeros(shape=(3,self.width, self.length))
-        # First add other droplets in 0 layer
-        for j in range(self.routing_manager.n_droplets):
-            if j == agent_index:
-                continue
-            o_drp = self.routing_manager.droplets[j]
-            obs = self._addDropletInObsLayer(obs, o_drp, 0)
-        # Add destination in 1 layer
-        dst = self.routing_manager.destinations[agent_index]
-        obs = self._addDropletInObsLayer(obs, dst, 1)
-        # Add droplet in 2 layer
-        drp = self.routing_manager.droplets[agent_index]
-        obs = self._addDropletInObsLayer(obs, drp, 2)
-        obs = obs.flatten()
-        return obs
-
-    def _addDropletInObsLayer(self, obs, droplet, layer):
-        y_min = 0 if droplet.y_min < 0 else droplet.y_min
-        y_max = self.width - 1 if droplet.y_max >= self.width else droplet.y_max
+        fov = 19
+        obs = np.zeros(shape=(4, fov, fov))
+        center_x = self.routing_manager.droplets[agent_index].x_center
+        center_y = self.routing_manager.droplets[agent_index].y_center
+        origin = (center_x-fov//2, center_y-fov//2)
+        # First droplets in 0 layer
+        drop = self.routing_manager.droplets[agent_index]
+        y_min = 0 if drop.y_min < 0 else drop.y_min
+        y_max = self.width - 1 if drop.y_max >= self.width else drop.y_max
+        x_min = 0 if drop.x_min < 0 else drop.x_min
+        x_max = self.length - 1 if drop.x_max >= self.length else drop.x_max
         for y in range(y_min, y_max + 1):
-            x_min = 0 if droplet.x_min < 0 else droplet.x_min
-            x_max = self.length - 1 if droplet.x_max >= self.length else droplet.x_max
             for x in range(x_min, x_max + 1):
-                obs[layer][y][x] = 1
+                n_x, n_y = x-origin[0], y-origin[1]
+                if (0 <= n_x < fov) and (0 <= n_y < fov):
+                    obs[0][n_y][n_x] = agent_index+1
+        # get current droplet's goal layer 1
+        des = self.routing_manager.destinations[agent_index]
+        y_min = 0 if des.y_min < 0 else des.y_min
+        y_max = self.width - 1 if des.y_max >= self.width else des.y_max
+        x_min = 0 if des.x_min < 0 else des.x_min
+        x_max = self.length - 1 if des.x_max >= self.length else des.x_max
+        for y in range(y_min, y_max + 1):
+            for x in range(x_min, x_max + 1):
+                n_x, n_y = x-origin[0], y-origin[1]
+                if (0 <= n_x < fov) and (0 <= n_y < fov):
+                    obs[1][n_y][n_x] = agent_index+1
+        # other droplets in 2 layer
+        for idx, d in enumerate(self.routing_manager.droplets):
+            if idx != agent_index:
+                y_min = 0 if d.y_min < 0 else d.y_min
+                y_max = self.width - 1 if d.y_max >= self.width else d.y_max
+                x_min = 0 if d.x_min < 0 else d.x_min
+                x_max = self.length - 1 if d.x_max >= self.length else d.x_max
+                for y in range(y_min, y_max + 1):
+                    for x in range(x_min, x_max + 1):
+                        n_x, n_y = x-origin[0], y-origin[1]
+                        if (0 <= n_x < fov) and (0 <= n_y < fov):
+                            obs[2][n_y][n_x] = idx+1
+        # get other's Goal layer 3
+        for idx, d in enumerate(self.routing_manager.destinations):
+            # if idx != agent_index and (abs(d.x_center-center_x)<=(fov//2+3) or abs(d.y_center-center_y)<=(fov//2+3)):
+            if idx != agent_index:
+                y_min = 0 if d.y_min < 0 else d.y_min
+                y_max = self.width - 1 if d.y_max >= self.width else d.y_max
+                x_min = 0 if d.x_min < 0 else d.x_min
+                x_max = self.length - 1 if d.x_max >= self.length else d.x_max
+                for y in range(y_min, y_max + 1):
+                    for x in range(x_min, x_max + 1):
+                        n_x = np.clip(x - origin[0], 0, fov-1)
+                        n_y = np.clip(y - origin[1], 0, fov-1)
+                        obs[3][n_y][n_x] = idx+1
+        dir_VEC = np.array([des.x_center-center_x, des.y_center-center_y])
+        obs = np.append(obs, dir_VEC)
         return obs
 
     def get_env_info(self):
         env_info = {"n_actions": len(self.actions),
                     "n_agents": len(self.agents),
-                    "state_shape": self.getOneObs(0).flatten().shape[-1],
                     "obs_shape": self.getOneObs(0).flatten().shape[-1],
                     "episode_limit": self.max_step}
         return env_info

@@ -7,7 +7,6 @@ class ReplayBuffer:
         self.args = args
         self.n_actions = self.args.n_actions
         self.n_agents = self.args.n_agents
-        # self.state_shape = self.args.state_shape
         self.obs_shape = self.args.obs_shape
         self.size = self.args.buffer_size
         self.episode_limit = self.args.episode_limit
@@ -17,7 +16,6 @@ class ReplayBuffer:
         # create the buffer to store info
         self.buffers = {'o': np.empty([self.size, self.episode_limit, self.n_agents, self.obs_shape]),
                         'u': np.empty([self.size, self.episode_limit, self.n_agents, 1]),
-                        # 's': np.empty([self.size, self.episode_limit, self.state_shape]),
                         'r': np.empty([self.size, self.episode_limit, 1]),
                         'o_next': np.empty([self.size, self.episode_limit, self.n_agents, self.obs_shape]),
                         # 's_next': np.empty([self.size, self.episode_limit, self.state_shape]),

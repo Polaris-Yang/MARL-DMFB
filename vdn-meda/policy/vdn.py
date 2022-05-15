@@ -9,7 +9,6 @@ class VDN:
     def __init__(self, args):
         self.n_actions = args.n_actions
         self.n_agents = args.n_agents
-        # self.state_shape = args.state_shape
         self.obs_shape = args.obs_shape
         input_shape = self.obs_shape
         # 根据参数决定RNN的输入维度

@@ -35,7 +35,7 @@ def getparameter():
     parser.add_argument('--stall', default=True, action='store_false',
                         help='whether the droplet can move or not after reach the target')
     parser.add_argument('--chip_size', type=int, default=10, help='chip_size')
-    parser.add_argument('--drop_num', type=int, default=3,
+    parser.add_argument('--drop_num', type=int, default=4,
                         help='the number of droplet')
     parser.add_argument('--block_num', type=int, default=0,
                         help='the number of block')
@@ -110,7 +110,7 @@ class evaluator():
         epoch_success = []
         health= np.zeros((args.evaluate_epoch,env.width,env.length))
         for epoch in trange(args.evaluate_epoch):
-            print(self.env.routing_manager.m_health)
+            # print(self.env.routing_manager.m_health)
             health[epoch]=self.env.routing_manager.m_health
             rewards, steps, success = self.evaluateOneEpoch()
             epoch_rewards.append(rewards)

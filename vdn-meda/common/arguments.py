@@ -15,7 +15,7 @@ def get_common_args():
     parser.add_argument('--alg', type=str, default='vdn',
                         help='the algorithm to train the agent')
     parser.add_argument('--n_steps', type=int,
-                        default=4000000, help='total time steps')
+                        default=2000000, help='total time steps')
     parser.add_argument('--n_episodes', type=int, default=10,
                         help='the number of episodes before once training')
     parser.add_argument('--last_action', default=True, action='store_false',
@@ -29,7 +29,7 @@ def get_common_args():
     parser.add_argument('--optimizer', type=str,
                         default="ADAM", help='optimizer')
     parser.add_argument('--evaluate_cycle', type=int,
-                        default=50000, help='how often to evaluate the model')
+                        default=100000, help='how often to evaluate the model')
     parser.add_argument('--evaluate_epoch', type=int, default=100,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--model_dir', type=str,
@@ -43,7 +43,7 @@ def get_common_args():
     parser.add_argument('--width', help='Width of the biochip', type = int, default = 30)
     parser.add_argument('--length', help='Length of the biochip', type = int, default = 60)
     parser.add_argument('--drop_num', type=int, default=2,help='the number of droplet')
-    parser.add_argument('--b-degrade', action = "store_true")
+    parser.add_argument('--b-degrade', default=True)
     parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 0)
     args = parser.parse_args()
     return args
@@ -52,7 +52,7 @@ def get_common_args():
 # arguments of vnd、 qmix
 def get_mixer_args(args):
     # network
-    args.rnn_hidden_dim = 256
+    args.rnn_hidden_dim = 128
     args.qmix_hidden_dim = 32
     args.two_hyper_layers = True
     args.hyper_hidden_dim = 32
@@ -70,15 +70,15 @@ def get_mixer_args(args):
 
     # experience replay
     args.batch_size = 64
-    args.buffer_size = int(5000)
+    args.buffer_size = int(10000)
 
     # how often to save the model
-    args.save_cycle = 5000
+    args.save_cycle = 2000
 
     # how often to update the target_net
     args.target_update_cycle = 200
 
     # prevent gradient explosion
-    args.grad_norm_clip = 8
+    args.grad_norm_clip = 10
 
     return args
