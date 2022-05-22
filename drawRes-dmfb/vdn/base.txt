@@ -1,4 +1,0 @@
-FOV =  5 
-args.rnn_hidden_dim = 32
-n_steps = 3000000
-batch = 64

@@ -53,7 +53,7 @@ def evaluateOnce(args, path_log, env, repeat_num):
     health= np.zeros((args.evaluate_epoch,env.width,env.length))
     for i in range(len_results):
         print('### Evaluating iteration %d' %(i))
-        model_name = '_'.join(['repeat', '1', 'training', '100', '20000'])
+        model_name = '_'.join(['repeat', '1', 'training', '200', '20000'])
         path_multi = os.path.join(path_log, model_name)
         if args.method == 'centralized':
             multi_agent = algo.load(path_multi)
@@ -100,7 +100,7 @@ def evaluateSeveralTimes(args=None, path_log=None):
         print("### In repeat %d" %(repeat))
         start_time = time.time()
         env = MEDAEnv(w=args.width, l=args.length, n_agents=args.n_agents,
-                      b_degrade= True, per_degrade = args.per_degrade)
+                      b_degrade= True, per_degrade = 1.0)
         results,healthy = evaluateOnce(args, path_log, env, repeat_num=repeat)
         print("### Repeat %s costs %s seconds ###" %(str(repeat), time.time() - start_time))
         multi_rewards.append(results['multi'])
@@ -130,15 +130,15 @@ def get_parser():
     parser.add_argument('--n-timesteps', help='Number of timesteps for each iteration',
                         type=int, default=20000)
     # env settings
-    parser.add_argument('--width', help='Width of the biochip', type = int, default = 30)
-    parser.add_argument('--length', help='Length of the biochip', type = int, default = 60)
-    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 2)
+    parser.add_argument('--width', help='Width of the biochip', type = int, default = 30 )
+    parser.add_argument('--length', help='Length of the biochip', type = int, default = 60 )
+    parser.add_argument('--n-agents', help='Number of agents', type = int, default = 4 )
     parser.add_argument('--b-degrade', action = "store_true")
-    parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 1.0)
+    parser.add_argument('--per-degrade', help='Percentage of degrade', type = float, default = 1.0 )
     # rl evaluate
     parser.add_argument('--n-evaluate', help='Number of episodes to evaluate the model for each iteration',
                         type=int, default=100)
-    parser.add_argument('--evaluate_epoch', type=int, default=20,
+    parser.add_argument('--evaluate_epoch', type=int, default=10,
                         help='number of the epoch to evaluate the agent')
     parser.add_argument('--evaluate_episode', type=int, default=100,
                         help='number of the epoch to evaluate the agent')
