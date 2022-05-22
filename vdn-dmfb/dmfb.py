@@ -12,7 +12,7 @@ from numpy.lib.function_base import select
 import gym
 import numpy as np
 from gym import spaces, wrappers
-from gym.envs.classic_control import rendering
+#from gym.envs.classic_control import rendering
 from gym.utils import seeding
 from numpy.random import poisson
 from pettingzoo.utils.env import ParallelEnv
@@ -400,13 +400,13 @@ class RoutingTaskManager:
             if (0 <= x < fov) and (0 <= y < fov):
                 obs_i[0][y][x] = idx+1
         # get current droplet's goal layer 1
-        # x = np.clip(self.droplets[agent_i].des_x - origin[0], 0, fov-1)
-        # y = np.clip(self.droplets[agent_i].des_y - origin[1], 0, fov-1)
-        # obs_i[1][y][x] = agent_i+1
-        x = self.droplets[agent_i].des_x - origin[0]
-        y = self.droplets[agent_i].des_y - origin[1]
-        if (0 <= x < fov) and (0 <= y < fov):
-            obs_i[1][y][x] = agent_i+1
+        x = np.clip(self.droplets[agent_i].des_x - origin[0], 0, fov-1)
+        y = np.clip(self.droplets[agent_i].des_y - origin[1], 0, fov-1)
+        obs_i[1][y][x] = agent_i+1
+        # x = self.droplets[agent_i].des_x - origin[0]
+        # y = self.droplets[agent_i].des_y - origin[1]
+        # if (0 <= x < fov) and (0 <= y < fov):
+            # obs_i[1][y][x] = agent_i+1
         # get other's Goal layer 2
         for idx, d in enumerate(self.droplets):
             if idx != agent_i and (abs(d.x-center_x)<fov and abs(d.y-center_y)<fov):
@@ -432,7 +432,7 @@ class RoutingTaskManager:
             obs_i[3, 0:upbound, :] = 1
         elif downbound > 0:
             obs_i[3, -downbound:, :] = 1
-        dir = np.array([tar_x-center_x, tar_y-center_y])
+        dir = np.array([(tar_x-center_x)/self.length, (tar_y-center_y)/self.width])
         obs_i = np.append(obs_i, dir)
         return obs_i
 
