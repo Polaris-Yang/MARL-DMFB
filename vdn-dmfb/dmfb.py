@@ -12,7 +12,7 @@ from numpy.lib.function_base import select
 import gym
 import numpy as np
 from gym import spaces, wrappers
-#from gym.envs.classic_control import rendering
+from gym.envs.classic_control import rendering
 from gym.utils import seeding
 from numpy.random import poisson
 from pettingzoo.utils.env import ParallelEnv
@@ -409,7 +409,7 @@ class RoutingTaskManager:
             # obs_i[1][y][x] = agent_i+1
         # get other's Goal layer 2
         for idx, d in enumerate(self.droplets):
-            if idx != agent_i and (abs(d.x-center_x)<fov and abs(d.y-center_y)<fov):
+            if idx != agent_i and (abs(d.x-center_x)<(fov/2) and abs(d.y-center_y)<(fov/2)):
                 x = np.clip(d.des_x-origin[0], 0, fov-1)
                 y = np.clip(d.des_y-origin[1], 0, fov-1)
                 obs_i[2][y][x] = idx+1
